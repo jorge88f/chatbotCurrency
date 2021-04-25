@@ -17,7 +17,7 @@ class CreateAccountsTable extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users');
             $table->foreignId('currency_id')->constrained('currencies');
-            $table->double('amount', 8, 6);
+            $table->double('amount', 16, 6);
             $table->timestamps();
         });
     }

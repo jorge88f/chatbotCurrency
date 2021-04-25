@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AccountController;
+use App\Http\Controllers\GlobalController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,5 +18,8 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::post('bot',[AccountController::class, 'index'])->name('bot');
+Route::post('bot',[GlobalController::class, 'index'])->name('bot');
+Route::get('test',[GlobalController::class, 'test'])->name('test');
+
+
 // Route::resource('account',);
