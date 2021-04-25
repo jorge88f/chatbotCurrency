@@ -18,4 +18,5 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::post('bot',[AccountController::class, 'index'])->name('bot');
 // Route::resource('account',);

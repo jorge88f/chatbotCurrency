@@ -1,0 +1,73 @@
+*{
+    margin: 0;
+    padding: 0;
+
+}
+html,body{
+    display:grid;
+    height: 100%;
+    width: 70%;
+    place-items: center;    
+    font-size: 18px;
+}
+.wrapper{
+    width:100%;
+    height: 100%;
+    background: #fff;
+    border-radius: 5px;
+    border: 1px solid;
+}
+.wrapper .title{
+    background:rgb(2, 146, 74);
+    color: #fff;
+    height: 50px;
+    font-size: 30px;
+    text-align: center;
+    border-radius: 5px 5px;
+    padding: 5px;
+}
+.wrapper .form{
+    padding: 20px;
+    min-height: 90%;
+    max-height: 90%;
+    overflow-y: auto;
+}
+.wrapper .form .inbox{
+    width: 100%;
+    display: flex;
+    margin-top: 5px;;
+}
+.wrapper .form .user-inbox{
+    justify-content: flex-end;
+    margin: 10px 5px 0px 5%;
+    display: flex;
+    background: rgb(103, 194, 148);
+    color: #FFF;
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 15px;
+}
+.wrapper .input-data .text{
+    display: inline;
+    width: 60%;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 15px;
+    display: inline;
+}
+.wrapper .input-data .btn{
+    background:rgb(2, 146, 74);
+    color: #fff;
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 15px;
+}
+
+.wrapper .form .inbox .msg-header{
+    background:rgb(2, 146, 74);
+    color: #fff;
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 15px;
+}
+

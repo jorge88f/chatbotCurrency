@@ -5,7 +5,8 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Chatbot</title>
         <link href="/css/app.css" rel="stylesheet"></link>
-        <!-- <script src="https://kit.fontawesome.com/a076d05399.js"></script> -->
+        <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+        
     </head>
     <body>
         <div class="wrapper">
@@ -16,17 +17,41 @@
                         <p>Hi, how can I help you?</p>
                     </div>
                 </div>
-                <div class="user-inbox">
-                    <div class="msg-header">
-                        <p>whats uuuuuup!</p>
-                    </div>
-                </div>
+                
             </div>
             <div class="input-data">
-                <input type="text" class="text" placeholder="Text to send"></input>
-                <button>send</button>
+                <input id="message" type="text" class="text" placeholder="Text to send"></input>
+                <button id="send-msg" class="btn">SEND</button>
              </div>
         </div>
 
+        <script>
+            $(document).ready(function(){
+                $("#send-msg").on("click",function(){
+                    $value = $("#message").val();
+                    if($value != ''){
+                        $userMessage = '<div class="user-inbox"><div class="msg-header"><p>'+ $value +'</p></div></div>';
+                    $(".form").append($userMessage);
+                    $("#message").val('');
+                    $.ajax({
+                        url: 'bot',
+                        type: 'POST',
+                        data: {
+                                        _token: '{{ csrf_token() }}',
+                                        text: $value
+									},
+
+                        success: function(result){
+                            $botMessage = '<div class="bot-inbox inbox"><div class="msg-header"><p>'+ result +'</p></div></div>';
+                            $(".form").append($botMessage);
+                        }
+                    });
+                    }
+                });
+            });
+    </script>
+
+
     </body>
+   
 </html>
