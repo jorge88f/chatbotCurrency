@@ -82,4 +82,25 @@ class MessageController extends Controller
     {
         //
     }
+
+    /**
+     * Show how to response whith specific words
+     *
+     * @param    $message the text to look for
+     * @return string whith the mesage
+     */
+    public static function findText($message)
+    {
+        try{
+            $msg = Message::where('request','like','%'.strtolower($message).'%')->firstOrFail();
+        }catch(\Exception $e){
+            $msg = "Sorry I can`t understand, try typing info";
+        }
+
+        if(isset($msg->response)){
+            return $msg->response;
+        }else{
+            return $msg;
+        }
+    }
 }

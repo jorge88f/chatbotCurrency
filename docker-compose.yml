@@ -11,6 +11,7 @@ services:
     ports:
       - 3306:3306
   myapp:
+    container_name: chatbot_container
     tty: true
     image: docker.io/bitnami/laravel:8
     environment:

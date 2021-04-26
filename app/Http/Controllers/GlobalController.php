@@ -4,10 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Account;
 use Illuminate\Http\Request;
+use App\Http\Controllers\MessageController;
 
 
-
-use App\Models\Message;
 
 class GlobalController extends Controller
 {
@@ -16,66 +15,93 @@ class GlobalController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        return $this->convert();
-        return $_POST['text'];
-        //
+        if(isset($_POST['text'])){
+            return $this->analize($_POST['text'],$request);
+        }else{
+            return 'Please try again';
+        }
+        
     }
 
-    public function convert(){
-        // $endpoint = 'convert';
-        // $access_key = 'da17fea796f12498084b1ed04a27b81c';
+    /**
+     * Funtion to analize how to proceed
+     *
+     * @return string 
+     */
+    public function analize($message,$request){
+        if(str_contains($message,'#')){
+            return $this->execute($message,$request);
+        }else{
+            return MessageController::findText($message);
+        }
+    }
+    /**
+     * Funtion to execute orders from the chatbot interface
+     *
+     * @return string 
+     */
+    public function execute($message,$request){
+        $order = explode(" ", $message);
+        switch ($order[0]){
+            case '#login':
+                return  $this->login($order,$request);
+                break;
+            case '#logout':
+                return  $this->logout($request);
+                break;    
+            case '#exchange':
+                return 'llega al metodo de logueo';
+                break;
+            case '#deposit':
+                return 'llega al metodo de logueo';
+                break;
+            case '#withdraw':
+                return 'llega al metodo de logueo';
+                break;
+            case '#balance':
+                return 'llega al metodo de logueo';
+                break;
+            case '#signup':
+                return 'llega al metodo de logueo';
+                break;
+            default :
+                return 'invalid order';
+                break;
+        }
+    }
 
-        // $from = 'USD';
-        // $to = 'EUR';
-        // $amount = 10;
+    public function login($order,$request){
+        $credentials = ['email'=>$order[1],'password'=>$order[2]];
+        if (\Auth::attempt($credentials)) {
+            $request->session()->regenerate();
+            \Log::info(json_encode($request->session()->all()));
+            return('Now you are logged');
+        }else{
+            return 'The provided credentials do not match our records.';
+        }
+    }
 
-        // // initialize CURL:
-        // $ch = curl_init('http://data.fixer.io/api/'.$endpoint.'?access_key='.$access_key.'&from='.$from.'&to='.$to.'&amount='.$amount.'');   
-        // curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    public function logout(Request $request){
+        \Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            return 'See you soon!';
+    }
 
-        // // get the JSON data:
-        // $json = curl_exec($ch);
-        // curl_close($ch);
-        // \Log::info($json);
-        // // Decode JSON response:
-        // $conversionResult = json_decode($json, true);
-
-        // // access the conversion result
-        // $return = $conversionResult['result'];
-        // return $return;
-
-
-        // $endpoint = 'latest';
-        // $access_key = 'da17fea796f12498084b1ed04a27b81c';
-
-        // // Initialize CURL:
-        // $ch = curl_init('http://data.fixer.io/api/'.$endpoint.'?access_key='.$access_key.'');
-        // curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-        // // Store the data:
-        // $json = curl_exec($ch);
-        // curl_close($ch);
-        // \Log::info($json);
-        // // Decode JSON response:
-        // $exchangeRates = json_decode($json, true);
-
-        // // Access the exchange rate values, e.g. GBP:
-        // return $exchangeRates['rates']['GBP'];
-
-
-
-
+    /**
+     * Convert the amount of money into other currency
+     *
+     * @return string 
+     */
+    public function convert($info){
         $api_key = "TEqtHP43gXSi5bnMyJeLQnsjBSXBf4";
-	
-	    $currency1 = 'USD';
-	    $currency2 = 'EUR';
-        
-	    $currency1 = 'EURss';
-	    $currency2 = 'GBP';
-        
-	    $url = "https://www.amdoren.com/api/currency.php?api_key=$api_key&from=$currency1&to=$currency2";
+
+	    $from = $info['from'];
+	    $to = $info['to'];
+
+	    $url = "https://www.amdoren.com/api/currency.php?api_key=$api_key&from=$from&to=$to";
         
 	    $ch = curl_init();  
 	    curl_setopt($ch, CURLOPT_URL, $url);
@@ -87,21 +113,28 @@ class GlobalController extends Controller
 	    $parsed_json = json_decode($json_string);
 
         $error = $parsed_json->error;
-        if($error == 0){
+        if($error != 0){
             $return = $parsed_json->error_message;
         }else{
-            $return = $parsed_json->amount; 
-        }
-	   
+            //TODO
+            // verify logued
+            // insert amount
 
+            $return = $parsed_json->amount; 
+            $return *= $info['amount'];
+        }
         return $return;
 
     }
 
     public function test(){
-      
-    
-     return 'listo';
+        $info = array();
+
+        $info['amount'] = 30;
+        $info['from'] = 'USD';
+        $info['to'] = 'EUR';
+        return  $this->convert($info);
+    //  return 'listo';
     }
 
 }
