@@ -28,7 +28,7 @@ class MessageSeeder extends Seeder
         ]);
         Message::create([
             'request' => 'exchange | how to exchange',
-            'response' => 'You have to insert the character # followed from the word exchnge amount then the origin currency then the destini currency. eg: #exchange 30 USD EUR',
+            'response' => 'You have to insert the character # followed from the word exchnge amount then the origin currency then the destiny currency. eg: #exchange 30 USD EUR',
         ]);
 
         Message::create([

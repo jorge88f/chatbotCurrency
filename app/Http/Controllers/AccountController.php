@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Account;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class AccountController extends Controller
@@ -22,9 +23,21 @@ class AccountController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create($userId, $order)
     {
-        //
+        try{
+            $currencyController = app('App\Http\Controllers\CurrencyController');
+            $currency = $currencyController->findByName($oreder[2]);
+            $account = new Account; 
+            $account->amount =$oreder[2];
+            $account->user_id = $userId;
+            $account->currency_id = $currency->id;
+            $account->save();
+            return 'Account Created with amount: '.$oreder[2];
+        }catch(\Exception $e){
+            return 'Sorry there was a problem, try later';
+        }
+        
     }
 
     /**
@@ -37,6 +50,43 @@ class AccountController extends Controller
     {
         //
     }
+    
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  string $email
+     * @return \Illuminate\Http\Response
+     */
+    public function findEmail($email)
+    {
+        try{
+            $user = User::where('email','like','%'.$email.'%')->firstOrFail();
+            return $user->id;
+        }catch(\Exception $e){
+            return false;
+        }
+        
+        //
+    }
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  string $user
+     * @return \Illuminate\Http\Response
+     */
+    public function findByUser($user)
+    {
+        try{
+            $accounts = Account::where('user_id','=',$user)->join('currencies','currencies.id','=','accounts.currency_id')->get();
+            return $accounts;
+        }catch(\Exception $e){
+            \Log::info($e->getMessage().$e->getFile().$e->getLine());
+            return "there are no accounts to show";
+        }
+        
+        //
+    }
+
 
     /**
      * Display the specified resource.
@@ -46,6 +96,7 @@ class AccountController extends Controller
      */
     public function show(Account $account)
     {
+
         //
     }
 
@@ -57,6 +108,7 @@ class AccountController extends Controller
      */
     public function edit(Account $account)
     {
+        $account->save();
         //
     }
 

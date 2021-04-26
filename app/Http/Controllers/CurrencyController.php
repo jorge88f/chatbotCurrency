@@ -38,6 +38,24 @@ class CurrencyController extends Controller
         //
     }
 
+     /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function findByName($name)
+    {
+        try{
+            $currency = Currency::where('name','=',$name)->firstOrFail();
+            return $currency;
+        }catch(\Exception $e){
+            return false;
+        }
+    }
+
+
+    
     /**
      * Display the specified resource.
      *

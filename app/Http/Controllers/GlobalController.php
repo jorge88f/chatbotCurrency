@@ -52,16 +52,16 @@ class GlobalController extends Controller
                 return  $this->logout($request);
                 break;    
             case '#exchange':
-                return 'llega al metodo de logueo';
+                return $this->exchange($order, $request);
                 break;
             case '#deposit':
-                return 'llega al metodo de logueo';
+                return $this->deposit($order, $request);
                 break;
             case '#withdraw':
                 return 'llega al metodo de logueo';
                 break;
             case '#balance':
-                return 'llega al metodo de logueo';
+                return $this->balance($request);
                 break;
             case '#signup':
                 return 'llega al metodo de logueo';
@@ -75,19 +75,64 @@ class GlobalController extends Controller
     public function login($order,$request){
         $credentials = ['email'=>$order[1],'password'=>$order[2]];
         if (\Auth::attempt($credentials)) {
-            $request->session()->regenerate();
-            \Log::info(json_encode($request->session()->all()));
+            $accountController = app('App\Http\Controllers\AccountController');
+            $user = $accountController->findEmail($order[1]);
+            $request->session()->put('user',$user);
             return('Now you are logged');
         }else{
             return 'The provided credentials do not match our records.';
         }
     }
 
-    public function logout(Request $request){
+    public function logout($request){
         \Auth::logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-            return 'See you soon!';
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return 'See you soon!';
+    }
+
+    public function exchange($order,$request){
+        //TODO Finish insetion transaction
+        //    #exchange 30 USD EUR
+        $info = array();
+        $info['amount'] = $order[1];
+        $info['from'] = $order[2];
+        $info['to'] = $order[3];
+        return  $this->convert($info);
+    }
+
+    public function deposit($order,$request){
+        // #deposit 30 USD
+        if($request->session()->get('user')>0){
+            $accountController = app('App\Http\Controllers\AccountController');
+            $accounts = $accountController->findByUser($request->session()->get('user'));
+        }else{
+            return "you must login to perform this action";
+        }
+            $inserted = false;
+            foreach($accounts as $account){
+                if($account->name == $order[2]){
+                    $account->amount += $order[1];
+                    return $accountController->edit($account);
+                break;
+                }
+            }
+                return $accountController->create($request->session()->get('user'),$order);        
+    }
+    public function balance($request){
+        // #balance
+        if($request->session()->get('user')>0){
+            $accountController = app('App\Http\Controllers\AccountController');
+            $accounts = $accountController->findByUser($request->session()->get('user'));
+            $msg = '';
+            foreach($accounts as $account){
+                $msg = $msg.'account: '.$account->id.'  currency:'.$account->name.'  amount:'.$account->amount;
+            }
+            return $msg;
+        }else{
+            $return = "you must login to perform this action";
+        }  
+        return $return;
     }
 
     /**

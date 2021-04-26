@@ -11,7 +11,7 @@ This apllication provide a view to interact with the bot, also allows currency e
 
 ## Requirements
     It´s required to have docker installed.
-    [docker](https://docs.docker.com/get-docker/)
+    https://docs.docker.com/get-docker/
 
 ## Installation
 1) In the project folder run
@@ -33,5 +33,4 @@ docker exec -it chatbot_container php artisan db:seed --class=AccountSeeder
 docker exec -it chatbot_container php artisan db:seed --class=MessageSeeder 
 ```
 ## Use
-When the installation is finished you can see the chatbot in localhost:3000.
-[chatbot](localhost:3000)
+When the installation is finished you can see the chatbot in http://localhost:3000.
