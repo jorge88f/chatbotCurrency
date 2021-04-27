@@ -20,10 +20,45 @@ class UserController extends Controller
     /**
      * Show the form for creating a new resource.
      *
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create($request)
     {
+        // #signup jorge@flores.com 123456 30 USD
+        $order = explode(" ", $_POST['text']);
+        try{
+            $exist = User::where('email','=',$order[1])->firstOrFail();
+            return "this email has been taken";
+        }catch(\Exception $e){
+            try{
+                $currencyController = app('App\Http\Controllers\CurrencyController');
+                $currency = $currencyController->findByName($order[4]);
+                if($currency){
+                    \DB::beginTransaction();
+                    $user = new User;
+                    $user->name=$order[1];
+                    $user->email=strtolower($order[1]);
+                    $user->password=bcrypt($order[2]);
+                    $user->currency_id=$currency->id;
+                    $user->save();
+                    $data = array();
+                    $data[1]= $order[3];
+                    $data[2]= $order[4];
+                    $accountController = app('App\Http\Controllers\AccountController');
+                    $response = $accountController->create($user->id,$data);
+                    \DB::commit();
+                    return $response;
+                }else{
+                    \DB::rollback();
+                    return "That currency it´s not available";
+                }
+            }catch(\Exception $e){
+                \Log::info(' File: '. $e->getFile() . ' Line: '.$e->getLine(). ' Message: '.$e->getMessage());
+                return "Sorry, There was an error";
+            }
+        }
+
         //
     }
 
@@ -106,9 +141,8 @@ class UserController extends Controller
             \Log::info(' File: '. $e->getFile() . ' Line: '.$e->getLine(). ' Message: '.$e->getMessage());
             return 'please login again, sorry.';
         }
-        
-        
     }
+
     /**
      * Logout the user
      *

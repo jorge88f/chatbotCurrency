@@ -66,12 +66,18 @@ class GlobalController extends Controller
                 return $this->balance($request);
                 break;
             case '#signup':
-                return 'llega al metodo de logueo';
+                return $this->signup($request);
                 break;
             default :
                 return 'Invalid order, type info for more information';
                 break;
         }
+    }
+
+    public function signup($request){
+        $userController = app('App\Http\Controllers\UserController');
+        $response = $userController->create($request);
+        return $response;
     }
 
     public function login($request){

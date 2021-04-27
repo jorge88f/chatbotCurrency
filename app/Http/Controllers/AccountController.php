@@ -33,7 +33,7 @@ class AccountController extends Controller
             $account->user_id = $userId;
             $account->currency_id = $currency->id;
             $account->save();
-            return 'Account Created with amount: '.$order[2];
+            return 'Account Created with amount: '.$order[1].$order[2];
         }catch(\Exception $e){
             \Log::info(' File: '. $e->getFile() . ' Line: '.$e->getLine(). ' Message: '.$e->getMessage());
             return 'Sorry there was a problem, try later';
