@@ -60,7 +60,7 @@ class GlobalController extends Controller
                 return $this->deposit($order, $request);
                 break;
             case '#withdraw':
-                return 'llega al metodo de logueo';
+                return $this->withdraw($order, $request);
                 break;
             case '#balance':
                 return $this->balance($request);
@@ -69,7 +69,7 @@ class GlobalController extends Controller
                 return 'llega al metodo de logueo';
                 break;
             default :
-                return 'invalid order';
+                return 'Invalid order, type info for more information';
                 break;
         }
     }
@@ -121,10 +121,9 @@ class GlobalController extends Controller
         }catch(\Exception $e){
             \Log::info(' File: '. $e->getFile() . ' Line: '.$e->getLine(). ' Message: '.$e->getMessage());
             return 'there was an error, try again please';
-        }
-
-              
+        }  
     }
+
     public function balance($request){
         // #balance
         if($request->session()->get('user')>0){
@@ -138,6 +137,33 @@ class GlobalController extends Controller
             $msg = "you must login to perform this action";
         }  
         return $msg;
+    }
+
+    public function withdraw($order,$request){
+        // #withdraw 30 USD
+        try{
+            if($request->session()->get('user')>0){
+                $accountController = app('App\Http\Controllers\AccountController');
+                $accounts = $accountController->findByUser($request->session()->get('user'));
+            }else{
+                return "you must login to perform this action";
+            }
+                $inserted = false;
+                foreach($accounts as $account){
+                    if($account->name == $order[2]){
+                        $account->amount -= $order[1];
+                        if($account->amount >0){
+                            return "That is to much for your account";
+                        }
+                        return $accountController->edit($account);
+                    break;
+                    }
+                }
+             return "You don´t have an account with this currency";  
+        }catch(\Exception $e){
+            \Log::info(' File: '. $e->getFile() . ' Line: '.$e->getLine(). ' Message: '.$e->getMessage());
+            return 'There was an error, try again please';
+        }  
     }
 
     public function test(){
