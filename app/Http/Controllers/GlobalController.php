@@ -24,7 +24,6 @@ class GlobalController extends Controller
         }else{
             return 'Please try again';
         }
-        
     }
 
     /**
@@ -54,7 +53,7 @@ class GlobalController extends Controller
                 return  $this->logout($request);
                 break;    
             case '#exchange':
-                return $this->exchange($order, $request);
+                return $this->exchange($request);
                 break;
             case '#deposit':
                 return $this->deposit($order, $request);
@@ -95,17 +94,32 @@ class GlobalController extends Controller
     public function exchange($request){
         //TODO Finish insetion transaction
         //    #exchange 30 USD EUR
-        $order = explode(" ", $_POST['text']);
-        $info = array();
-        $info['amount'] = $order[1];
-        $info['from'] = $order[2];
-        $info['to'] = $order[3];
-        $wsController = app('App\Http\Controllers\ExternalWsController');
-        $response = $wsController->convert($info);
-        return $response;
+        try{
+            if($request->session()->get('user')>0){
+                $accountController = app('App\Http\Controllers\AccountController');
+                $accounts = $accountController->findByUser($request->session()->get('user'));
+            }else{
+                return "you must login to perform this action";
+            }
+            $order = explode(" ", $_POST['text']);
+            $info = array();
+            $info['amount'] = $order[1];
+            $info['from'] = $order[2];
+            $info['to'] = $order[3];
+            $wsController = app('App\Http\Controllers\ExternalWsController');
+            $response = $wsController->convert($info);
+            $transactionController = app('App\Http\Controllers\TransactionController');
+            $transactionController->create($request);
+            return $response;
+        }catch(\Exception $e){
+            \Log::info(' File: '. $e->getFile() . ' Line: '.$e->getLine(). ' Message: '.$e->getMessage());
+            return "can´t perform action";
+        }
+       
     }
 
     public function deposit($order,$request){
+
         // #deposit 30 USD
         // TODO validate against ws not only to db
         try{
@@ -119,11 +133,18 @@ class GlobalController extends Controller
                 foreach($accounts as $account){
                     if($account->name == $order[2]){
                         $account->amount += $order[1];
-                        return $accountController->edit($account);
+                        $response = $accountController->edit($account);
+                        $inserted = true;
                     break;
                     }
                 }
-             return $accountController->create($request->session()->get('user'),$order);  
+                $transactionController = app('App\Http\Controllers\TransactionController');
+                    $transactionController->create($request);
+                if(!$inserted){
+                    $response = $accountController->create($request->session()->get('user'),$order);  
+                }
+                return $response;
+            
         }catch(\Exception $e){
             \Log::info(' File: '. $e->getFile() . ' Line: '.$e->getLine(). ' Message: '.$e->getMessage());
             return 'there was an error, try again please';
@@ -158,14 +179,18 @@ class GlobalController extends Controller
                 foreach($accounts as $account){
                     if($account->name == $order[2]){
                         $account->amount -= $order[1];
-                        if($account->amount >0){
+                        if($account->amount <0){
                             return "That is to much for your account";
                         }
-                        return $accountController->edit($account);
-                    break;
+                        $response = $accountController->edit($account);
+                        $transactionController = app('App\Http\Controllers\TransactionController');
+                        $transactionController->create($request);
+                        return $response;
+                        break;
                     }
                 }
-             return "You don´t have an account with this currency";  
+            $response =  "You don´t have an account with this currency";  
+            return $response;
         }catch(\Exception $e){
             \Log::info(' File: '. $e->getFile() . ' Line: '.$e->getLine(). ' Message: '.$e->getMessage());
             return 'There was an error, try again please';

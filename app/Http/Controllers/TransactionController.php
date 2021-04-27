@@ -20,11 +20,47 @@ class TransactionController extends Controller
     /**
      * Show the form for creating a new resource.
      *
-     * @return \Illuminate\Http\Response
+     * @param  \Illuminate\Http\Request  $request
+     * @return boolean
      */
-    public function create()
+    public function create($request)
     {
-        //
+        try{
+            $transaction = new Transaction;
+            $transaction->user_id = $request->session()->get('user');
+            $order = explode(" ", $_POST['text']);
+            switch ($order[0]){
+                case '#exchange':
+                    #exchange 30 USD EUR
+                    $transaction->transaction_type= 'exchange';
+                    $transaction->currency_from= $order[2];
+                    $transaction->currency_to= $order[3];
+                    $transaction->amount_from= $order[1];
+                    break;
+                case '#deposit':
+                    $transaction->transaction_type= 'deposit';
+                    $transaction->currency_from= $order[2];
+                    $transaction->currency_to= $order[2];
+                    $transaction->amount_from= $order[1];
+                    $transaction->amount_to= $order[1];
+                    break;
+                case '#withdraw':
+                    $transaction->transaction_type= 'withdraw';
+                    $transaction->currency_from= $order[2];
+                    $transaction->currency_to= $order[2];
+                    $transaction->amount_from= $order[1];
+                    $transaction->amount_to= $order[1];
+                    break;
+                default :
+                    return 'Invalid order, type info for more information';
+                    break;
+            }
+            $transaction->save();
+            return true;
+        }catch(\Exception $e){
+            \Log::info(' File: '. $e->getFile() . ' Line: '.$e->getLine(). ' Message: '.$e->getMessage());
+            return false;
+        }
     }
 
     /**

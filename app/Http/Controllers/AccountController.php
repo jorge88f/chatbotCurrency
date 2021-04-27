@@ -109,8 +109,13 @@ class AccountController extends Controller
      */
     public function edit(Account $account)
     {
-        $account->save();
-        //
+        try{
+            $account->save();
+            return "transaction complete";
+        }catch(\Exception $e){
+            \Log::info(' File: '. $e->getFile() . ' Line: '.$e->getLine(). ' Message: '.$e->getMessage());
+            return "failed to update account";
+        }
     }
 
     /**

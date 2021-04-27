@@ -19,8 +19,8 @@ class CreateTransactionsTable extends Migration
             $table->string('transaction_type');
             $table->string('currency_from');
             $table->string('currency_to');
-            $table->double('ammount_from', 16, 6);
-            $table->double('ammount_to', 16, 6);
+            $table->double('amount_from', 16, 6);
+            $table->double('amount_to', 16, 6);
             $table->timestamps();
         });
     }

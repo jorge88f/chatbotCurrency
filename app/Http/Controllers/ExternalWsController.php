@@ -27,7 +27,6 @@ class ExternalWsController extends Controller
 	    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15); 
 	    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
         $json_string = curl_exec($ch);
-        \Log::info($json_string);
 	    $parsed_json = json_decode($json_string);
 
         $error = $parsed_json->error;
