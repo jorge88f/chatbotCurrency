@@ -27,14 +27,15 @@ class AccountController extends Controller
     {
         try{
             $currencyController = app('App\Http\Controllers\CurrencyController');
-            $currency = $currencyController->findByName($oreder[2]);
+            $currency = $currencyController->findByName($order[2]);
             $account = new Account; 
-            $account->amount =$oreder[2];
+            $account->amount =$order[1];
             $account->user_id = $userId;
             $account->currency_id = $currency->id;
             $account->save();
-            return 'Account Created with amount: '.$oreder[2];
+            return 'Account Created with amount: '.$order[2];
         }catch(\Exception $e){
+            \Log::info(' File: '. $e->getFile() . ' Line: '.$e->getLine(). ' Message: '.$e->getMessage());
             return 'Sorry there was a problem, try later';
         }
         

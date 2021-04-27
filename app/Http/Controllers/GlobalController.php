@@ -10,6 +10,8 @@ use App\Http\Controllers\MessageController;
 
 class GlobalController extends Controller
 {
+    // public $api_key = "GntH9uizLhUAhETaDjVrd2KXQS7Vfq";
+    // $api_key = "TEqtHP43gXSi5bnMyJeLQnsjBSXBf4";
     /**
      * Display a listing of the resource.
      *
@@ -46,7 +48,7 @@ class GlobalController extends Controller
         $order = explode(" ", $message);
         switch ($order[0]){
             case '#login':
-                return  $this->login($order,$request);
+                return  $this->login($request);
                 break;
             case '#logout':
                 return  $this->logout($request);
@@ -72,52 +74,56 @@ class GlobalController extends Controller
         }
     }
 
-    public function login($order,$request){
-        $credentials = ['email'=>$order[1],'password'=>$order[2]];
-        if (\Auth::attempt($credentials)) {
-            $accountController = app('App\Http\Controllers\AccountController');
-            $user = $accountController->findEmail($order[1]);
-            $request->session()->put('user',$user);
-            return('Now you are logged');
-        }else{
-            return 'The provided credentials do not match our records.';
-        }
+    public function login($request){
+        $userController = app('App\Http\Controllers\UserController');
+        $response = $userController->login($request);
+        return $response;
     }
 
     public function logout($request){
-        \Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-        return 'See you soon!';
+        $userController = app('App\Http\Controllers\UserController');
+        $response = $userController->logout($request);
+        return $response;
     }
 
-    public function exchange($order,$request){
+    public function exchange($request){
         //TODO Finish insetion transaction
         //    #exchange 30 USD EUR
+        $order = explode(" ", $_POST['text']);
         $info = array();
         $info['amount'] = $order[1];
         $info['from'] = $order[2];
         $info['to'] = $order[3];
-        return  $this->convert($info);
+        $wsController = app('App\Http\Controllers\ExternalWsController');
+        $response = $wsController->convert($info);
+        return $response;
     }
 
     public function deposit($order,$request){
         // #deposit 30 USD
-        if($request->session()->get('user')>0){
-            $accountController = app('App\Http\Controllers\AccountController');
-            $accounts = $accountController->findByUser($request->session()->get('user'));
-        }else{
-            return "you must login to perform this action";
-        }
-            $inserted = false;
-            foreach($accounts as $account){
-                if($account->name == $order[2]){
-                    $account->amount += $order[1];
-                    return $accountController->edit($account);
-                break;
-                }
+        // TODO validate against ws not only to db
+        try{
+            if($request->session()->get('user')>0){
+                $accountController = app('App\Http\Controllers\AccountController');
+                $accounts = $accountController->findByUser($request->session()->get('user'));
+            }else{
+                return "you must login to perform this action";
             }
-                return $accountController->create($request->session()->get('user'),$order);        
+                $inserted = false;
+                foreach($accounts as $account){
+                    if($account->name == $order[2]){
+                        $account->amount += $order[1];
+                        return $accountController->edit($account);
+                    break;
+                    }
+                }
+             return $accountController->create($request->session()->get('user'),$order);  
+        }catch(\Exception $e){
+            \Log::info(' File: '. $e->getFile() . ' Line: '.$e->getLine(). ' Message: '.$e->getMessage());
+            return 'there was an error, try again please';
+        }
+
+              
     }
     public function balance($request){
         // #balance
@@ -126,59 +132,18 @@ class GlobalController extends Controller
             $accounts = $accountController->findByUser($request->session()->get('user'));
             $msg = '';
             foreach($accounts as $account){
-                $msg = $msg.'account: '.$account->id.'  currency:'.$account->name.'  amount:'.$account->amount;
+                $msg = $msg.'--Account Number: '.$account->id.'  currency:'.$account->name.'  amount:'.$account->amount;
             }
-            return $msg;
         }else{
-            $return = "you must login to perform this action";
+            $msg = "you must login to perform this action";
         }  
-        return $return;
-    }
-
-    /**
-     * Convert the amount of money into other currency
-     *
-     * @return string 
-     */
-    public function convert($info){
-        $api_key = "TEqtHP43gXSi5bnMyJeLQnsjBSXBf4";
-
-	    $from = $info['from'];
-	    $to = $info['to'];
-
-	    $url = "https://www.amdoren.com/api/currency.php?api_key=$api_key&from=$from&to=$to";
-        
-	    $ch = curl_init();  
-	    curl_setopt($ch, CURLOPT_URL, $url);
-	    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-	    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15); 
-	    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-        $json_string = curl_exec($ch);
-        \Log::info($json_string);
-	    $parsed_json = json_decode($json_string);
-
-        $error = $parsed_json->error;
-        if($error != 0){
-            $return = $parsed_json->error_message;
-        }else{
-            //TODO
-            // verify logued
-            // insert amount
-
-            $return = $parsed_json->amount; 
-            $return *= $info['amount'];
-        }
-        return $return;
-
+        return $msg;
     }
 
     public function test(){
-        $info = array();
-
-        $info['amount'] = 30;
-        $info['from'] = 'USD';
-        $info['to'] = 'EUR';
-        return  $this->convert($info);
+        $userController = app('App\Http\Controllers\ExternalWsController');
+        $response = $userController->velidateCurrency('EUR');
+        return $response;
     //  return 'listo';
     }
 

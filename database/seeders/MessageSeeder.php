@@ -16,7 +16,7 @@ class MessageSeeder extends Seeder
     {
         Message::create([
             'request' => 'info | information | menu | help',
-            'response' => 'This application allows you to deposit, withdraw and exchange currencies, for more information try using one word like deposit, exchange...',
+            'response' => 'This application allows you to deposit, withdraw and exchange currencies, for more information try using one word like deposit, exchange... Available currencies: USD, EUR, GBP, JPY, AUD, CAD, CHF, CNY,', //TODO fill with info of the base
         ]);
         Message::create([
             'request' => 'bye | good bye | see you ',

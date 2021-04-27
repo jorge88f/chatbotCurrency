@@ -23,6 +23,21 @@ class CurrencySeeder extends Seeder
         $currency = new Currency;
         $currency->name = 'GBP';
         $currency->save();
+        $currency = new Currency;
+        $currency->name = 'JPY';
+        $currency->save();
+        $currency = new Currency;
+        $currency->name = 'AUD';
+        $currency->save();
+        $currency = new Currency;
+        $currency->name = 'CAD';
+        $currency->save();
+        $currency = new Currency;
+        $currency->name = 'CHF';
+        $currency->save();
+        $currency = new Currency;
+        $currency->name = 'CNY';
+        $currency->save();
 
     }
 }
